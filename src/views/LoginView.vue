@@ -2,10 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api, setPasscode } from '../api/client'
-import { useAppStore } from '../stores/app'
-
 const router = useRouter()
-const store = useAppStore()
 const code = ref('')
 const error = ref('')
 const loading = ref(false)
@@ -17,8 +14,6 @@ async function login() {
   try {
     await api.auth.login(code.value.trim())
     setPasscode(code.value.trim())
-    store.setOnlineMode(true)
-    await store.syncFromApi()
     router.push('/')
   } catch {
     error.value = '密码错误'
@@ -51,7 +46,7 @@ async function login() {
     <button
       class="btn btn-outline btn-block"
       style="margin-top:12px"
-      @click="store.setOnlineMode(false); router.push('/')"
+      @click="router.push('/')"
     >
       跳过，离线使用
     </button>
