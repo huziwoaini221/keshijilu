@@ -8,9 +8,5 @@ binding = "DB"
 database_name = "lesson-ledger"
 database_id = ""
 
-[[r2_buckets]]
-binding = "ASSETS"
-bucket_name = "lesson-ledger"
-
 [vars]
-PASSCODE = ""
+PASSCODE = "your-passcode-here"
