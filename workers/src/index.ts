@@ -1,5 +1,3 @@
-import { generateId } from './utils'
-
 interface Env {
   DB: D1Database
   PASSCODE: string
@@ -20,10 +18,6 @@ function authenticate(request: Request, env: Env): Response | null {
     return json({ error: 'Unauthorized' }, 401)
   }
   return null
-}
-
-function familyScoped(where: string, familyId: string): string {
-  return `${where} AND family_id = ?`
 }
 
 // ── Router ───────────────────────────────────────────
@@ -55,17 +49,9 @@ export default {
       }
 
       if (path === '/api/families' && method === 'POST') {
-        const body = await request.json() as { name: string }
-        const id = generateId()
-        await db.prepare('INSERT INTO families (id, name) VALUES (?, ?)').bind(id, body.name).run()
-        return json({ id }, 201)
-      }
-
-      if (path.match(/^\/api\/families\/[\w-]+$/) && method === 'PUT') {
-        const id = path.split('/').pop()!
-        const body = await request.json()
-        await db.prepare('UPDATE families SET name = ? WHERE id = ?').bind((body as any).name, id).run()
-        return json({ ok: true })
+        const body = await request.json() as { id: string; name: string }
+        await db.prepare('INSERT INTO families (id, name) VALUES (?, ?)').bind(body.id, body.name).run()
+        return json({ ok: true }, 201)
       }
 
       // ── Children ──────────────────────────────
@@ -77,12 +63,11 @@ export default {
       }
 
       if (path === '/api/children' && method === 'POST') {
-        const body = await request.json() as { family_id: string; name: string; birthday?: string }
-        const id = generateId()
+        const body = await request.json() as { id: string; family_id: string; name: string; birthday?: string; created_at: string }
         await db.prepare(
-          'INSERT INTO children (id, family_id, name, birthday) VALUES (?, ?, ?, ?)'
-        ).bind(id, body.family_id, body.name, body.birthday || null).run()
-        return json({ id }, 201)
+          'INSERT INTO children (id, family_id, name, birthday, created_at) VALUES (?, ?, ?, ?, ?)'
+        ).bind(body.id, body.family_id, body.name, body.birthday || null, body.created_at).run()
+        return json({ ok: true }, 201)
       }
 
       if (path.match(/^\/api\/children\/[\w-]+$/) && method === 'PUT') {
@@ -113,12 +98,11 @@ export default {
       }
 
       if (path === '/api/organizations' && method === 'POST') {
-        const body = await request.json() as any
-        const id = generateId()
+        const body = await request.json() as { id: string; family_id: string; name: string; teacher?: string; phone?: string; address?: string; created_at: string }
         await db.prepare(
-          'INSERT INTO organizations (id, family_id, name, teacher, phone, address) VALUES (?, ?, ?, ?, ?, ?)'
-        ).bind(id, body.family_id, body.name, body.teacher || null, body.phone || null, body.address || null).run()
-        return json({ id }, 201)
+          'INSERT INTO organizations (id, family_id, name, teacher, phone, address, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
+        ).bind(body.id, body.family_id, body.name, body.teacher || null, body.phone || null, body.address || null, body.created_at).run()
+        return json({ ok: true }, 201)
       }
 
       if (path.match(/^\/api\/organizations\/[\w-]+$/) && method === 'PUT') {
@@ -151,17 +135,16 @@ export default {
 
       if (path === '/api/courses' && method === 'POST') {
         const body = await request.json() as any
-        const id = generateId()
         await db.prepare(
-          `INSERT INTO courses (id, family_id, child_id, organization_id, name, lessons_per_session, default_time_start, default_time_end, price, expire_date, alert_threshold)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          `INSERT INTO courses (id, family_id, child_id, organization_id, name, lessons_per_session, default_time_start, default_time_end, price, expire_date, alert_threshold, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
         ).bind(
-          id, body.family_id, body.child_id, body.organization_id || null,
+          body.id, body.family_id, body.child_id, body.organization_id || null,
           body.name, body.lessons_per_session || 1,
           body.default_time_start || null, body.default_time_end || null,
-          body.price || null, body.expire_date || null, body.alert_threshold || 10
+          body.price || null, body.expire_date || null, body.alert_threshold || 10, body.created_at
         ).run()
-        return json({ id }, 201)
+        return json({ ok: true }, 201)
       }
 
       if (path.match(/^\/api\/courses\/[\w-]+$/) && method === 'GET') {
@@ -170,7 +153,7 @@ export default {
         if (!course) return json({ error: 'Not found' }, 404)
 
         const [purchasesResult, recordsResult] = await db.batch([
-          db.prepare('SELECT SUM(lessons + gift_lessons) as total FROM purchases WHERE course_id = ?').bind(id),
+          db.prepare('SELECT COALESCE(SUM(lessons + gift_lessons), 0) as total FROM purchases WHERE course_id = ?').bind(id),
           db.prepare('SELECT COALESCE(SUM(consume_lessons), 0) as used FROM lesson_records WHERE course_id = ? AND consume_lessons > 0').bind(id),
         ])
         const totalBought = (purchasesResult.results?.[0] as any)?.total ?? 0
@@ -217,11 +200,10 @@ export default {
 
       if (path === '/api/purchases' && method === 'POST') {
         const body = await request.json() as any
-        const id = generateId()
         await db.prepare(
-          'INSERT INTO purchases (id, family_id, course_id, date, lessons, gift_lessons, amount, payment_method, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
-        ).bind(id, body.family_id, body.course_id, body.date, body.lessons, body.gift_lessons || 0, body.amount || null, body.payment_method || null, body.remark || null).run()
-        return json({ id }, 201)
+          'INSERT INTO purchases (id, family_id, course_id, date, lessons, gift_lessons, amount, payment_method, remark, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+        ).bind(body.id, body.family_id, body.course_id, body.date, body.lessons, body.gift_lessons || 0, body.amount || null, body.payment_method || null, body.remark || null, body.created_at).run()
+        return json({ ok: true }, 201)
       }
 
       if (path.match(/^\/api\/purchases\/[\w-]+$/) && method === 'PUT') {
@@ -249,15 +231,14 @@ export default {
 
       if (path === '/api/records' && method === 'POST') {
         const body = await request.json() as any
-        const id = generateId()
         await db.prepare(
-          'INSERT INTO lesson_records (id, family_id, course_id, date, start_time, end_time, status, consume_lessons, remark) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+          'INSERT INTO lesson_records (id, family_id, course_id, date, start_time, end_time, status, consume_lessons, remark, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
         ).bind(
-          id, body.family_id, body.course_id, body.date,
+          body.id, body.family_id, body.course_id, body.date,
           body.start_time || null, body.end_time || null,
-          body.status, body.consume_lessons, body.remark || null
+          body.status, body.consume_lessons, body.remark || null, body.created_at
         ).run()
-        return json({ id }, 201)
+        return json({ ok: true }, 201)
       }
 
       if (path.match(/^\/api\/records\/[\w-]+$/) && method === 'DELETE') {

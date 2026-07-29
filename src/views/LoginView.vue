@@ -2,7 +2,9 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { api, setPasscode } from '../api/client'
+import { useAppStore } from '../stores/app'
 const router = useRouter()
+const store = useAppStore()
 const code = ref('')
 const error = ref('')
 const loading = ref(false)
@@ -20,6 +22,7 @@ async function login() {
     await api.auth.login(code.value.trim())
     setPasscode(code.value.trim())
     localStorage.removeItem('lesson-ledger-skip-auth')
+    await store.syncFromApi()
     router.push('/')
   } catch {
     error.value = '密码错误'

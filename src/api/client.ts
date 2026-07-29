@@ -82,6 +82,6 @@ export const api = {
   },
   families: {
     list: () => get('/families'),
-    create: (name: string) => post('/families', { name }),
+    create: (body: { id: string; name: string }) => post('/families', body),
   },
 }
