@@ -8,6 +8,7 @@ const store = useAppStore()
 const code = ref('')
 const error = ref('')
 const loading = ref(false)
+const showPwd = ref(false)
 
 function skip() {
   localStorage.setItem('lesson-ledger-skip-auth', '1')
@@ -40,13 +41,19 @@ async function login() {
 
     <div v-if="error" class="alert alert-warning">{{ error }}</div>
 
-    <input
-      v-model="code"
-      type="password"
-      placeholder="输入密码"
-      style="text-align:center;font-size:18px;letter-spacing:4px;margin-bottom:16px"
-      @keyup.enter="login"
-    />
+    <div style="position:relative;margin-bottom:16px">
+      <input
+        v-model="code"
+        :type="showPwd ? 'text' : 'password'"
+        placeholder="输入密码"
+        style="text-align:center;font-size:18px;letter-spacing:4px;width:100%"
+        @keyup.enter="login"
+      />
+      <span
+        style="position:absolute;right:8px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:14px;color:var(--gray-500)"
+        @click="showPwd = !showPwd"
+      >{{ showPwd ? '隐藏' : '显示' }}</span>
+    </div>
 
     <button class="btn btn-primary btn-block" :disabled="loading" @click="login">
       {{ loading ? '验证中...' : '进入' }}
