@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Workers
+workers/node_modules
+workers/package-lock.json
+workers/.wrangler
