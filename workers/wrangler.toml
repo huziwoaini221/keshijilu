@@ -1,0 +1,16 @@
+name = "lesson-ledger-api"
+compatibility_date = "2025-01-01"
+
+pages_build_output_dir = "../dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "lesson-ledger"
+database_id = ""
+
+[[r2_buckets]]
+binding = "ASSETS"
+bucket_name = "lesson-ledger"
+
+[vars]
+PASSCODE = ""
