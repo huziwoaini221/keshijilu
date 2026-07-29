@@ -22,11 +22,11 @@ async function login() {
     await api.auth.login(code.value.trim())
     setPasscode(code.value.trim())
     localStorage.removeItem('lesson-ledger-skip-auth')
-    await store.syncFromApi()
+    loading.value = false
     router.push('/')
+    store.syncFromApi()
   } catch {
     error.value = '密码错误'
-  } finally {
     loading.value = false
   }
 }
