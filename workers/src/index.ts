@@ -34,8 +34,11 @@ export default {
     const method = request.method
     const db = env.DB
 
-    const authErr = authenticate(request, env)
-    if (authErr) return authErr
+    // Skip auth for login endpoint
+    if (path !== '/api/auth' || method !== 'POST') {
+      const authErr = authenticate(request, env)
+      if (authErr) return authErr
+    }
 
     try {
       // Auth

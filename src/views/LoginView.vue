@@ -7,6 +7,11 @@ const code = ref('')
 const error = ref('')
 const loading = ref(false)
 
+function skip() {
+  localStorage.setItem('lesson-ledger-skip-auth', '1')
+  router.push('/')
+}
+
 async function login() {
   if (!code.value.trim()) return
   loading.value = true
@@ -14,6 +19,7 @@ async function login() {
   try {
     await api.auth.login(code.value.trim())
     setPasscode(code.value.trim())
+    localStorage.removeItem('lesson-ledger-skip-auth')
     router.push('/')
   } catch {
     error.value = '密码错误'
@@ -46,7 +52,7 @@ async function login() {
     <button
       class="btn btn-outline btn-block"
       style="margin-top:12px"
-      @click="router.push('/')"
+      @click="skip"
     >
       跳过，离线使用
     </button>
