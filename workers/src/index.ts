@@ -3,10 +3,16 @@ interface Env {
   PASSCODE: string
 }
 
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Passcode, Authorization',
+}
+
 function json(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
   })
 }
 
@@ -27,6 +33,11 @@ export default {
     const path = url.pathname.replace(/\/$/, '')
     const method = request.method
     const db = env.DB
+
+    // CORS preflight
+    if (method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: CORS_HEADERS })
+    }
 
     // Skip auth for login endpoint
     if (path !== '/api/auth' || method !== 'POST') {
