@@ -26,8 +26,8 @@ async function login() {
     loading.value = false
     router.push('/')
     store.syncFromApi()
-  } catch {
-    error.value = '密码错误'
+  } catch (e: any) {
+    error.value = e.message || '登录失败'
     loading.value = false
   }
 }
