@@ -1,9 +1,0 @@
-name = "lesson-ledger-api"
-main = "src/index.ts"
-compatibility_date = "2025-01-01"
-
-[[d1_databases]]
-binding = "DB"
-database_name = "lesson-ledger"
-database_id = "06dc78eb-c079-40dc-a1ea-645e2d7a2d63"
-
