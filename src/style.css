@@ -75,6 +75,16 @@ body {
   font-weight: 600;
 }
 
+.btn-logout {
+  border: 1px solid var(--gray-200);
+  background: white;
+  color: var(--gray-500);
+  font-size: 13px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
 .app-main {
   padding: 16px;
 }

@@ -1,7 +1,17 @@
 <script setup lang="ts">
-import { RouterView, RouterLink, useRoute } from 'vue-router'
+import { RouterView, RouterLink, useRoute, useRouter } from 'vue-router'
+import { clearPasscode } from './api/client'
+import { hasPasscode } from './api/client'
 
 const route = useRoute()
+const router = useRouter()
+
+function logout() {
+  clearPasscode()
+  localStorage.removeItem('lesson-ledger-skip-auth')
+  localStorage.removeItem('lesson-ledger-family-id')
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -15,6 +25,7 @@ const route = useRoute()
         <RouterLink to="/children" :class="{ active: route.path.startsWith('/children') }">孩子</RouterLink>
         <RouterLink to="/organizations" :class="{ active: route.path.startsWith('/organizations') }">机构</RouterLink>
       </nav>
+      <button v-if="hasPasscode()" class="btn-logout" @click="logout">退出</button>
     </header>
     <main class="app-main">
       <RouterView />
