@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_URL || 'https://lesson-ledger-api.qihangmedical.workers.dev/api'
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 let passcode: string | null = localStorage.getItem('lesson-ledger-passcode')
 
