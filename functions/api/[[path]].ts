@@ -3,6 +3,7 @@ interface Env {
   PASSCODE: string
   BOT_TOKEN?: string
   CHAT_ID?: string
+  WECOM_WEBHOOK?: string
 }
 
 function json(data: unknown, status = 200) {
@@ -22,14 +23,24 @@ function authenticate(request: Request, env: Env): Response | null {
 }
 
 async function tg(env: Env, text: string) {
-  if (!env.BOT_TOKEN || !env.CHAT_ID) return
-  try {
-    await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: +env.CHAT_ID, text, parse_mode: 'Markdown' }),
-    })
-  } catch {}
+  if (env.BOT_TOKEN && env.CHAT_ID) {
+    try {
+      await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: +env.CHAT_ID, text, parse_mode: 'Markdown' }),
+      })
+    } catch {}
+  }
+  if (env.WECOM_WEBHOOK) {
+    try {
+      await fetch(env.WECOM_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ msgtype: 'text', text: { content: text } }),
+      })
+    } catch {}
+  }
 }
 
 async function courseInfo(db: D1Database, courseId: string) {
