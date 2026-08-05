@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { hasPasscode } from '../api/client'
+import { api, hasPasscode, setPasscode } from '../api/client'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -14,10 +14,21 @@ const router = createRouter({
   ],
 })
 
-router.beforeEach((to) => {
+router.beforeEach(async (to) => {
   if (to.name === 'login') return
   const skip = localStorage.getItem('lesson-ledger-skip-auth')
   if (!hasPasscode() && !skip) {
+    const key = new URLSearchParams(window.location.search).get('key')
+    if (key) {
+      try {
+        await api.auth.login(key)
+        setPasscode(key)
+        localStorage.removeItem('lesson-ledger-skip-auth')
+        return { path: to.path, query: {} }
+      } catch {
+        // 无效 key → 进入登录页
+      }
+    }
     return { name: 'login' }
   }
 })
